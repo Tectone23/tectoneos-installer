@@ -1,22 +1,27 @@
+pub mod events;
 mod routes;
-mod spinner;
 
 use std::error::Error;
 
-use iced::{Sandbox, Settings};
+use events::{task_worker, Connection};
+use iced::{executor, Application, Settings};
+use iced_native::{Command, Theme};
 use routes::{AppEvents, AppPages};
 
 #[derive(Default)]
 struct App {
     page: AppPages,
+    event_sender: Option<Connection>,
 }
 
-
-impl Sandbox for App {
+impl Application for App {
     type Message = AppEvents;
+    type Executor = executor::Default;
+    type Theme = Theme;
+    type Flags = ();
 
-    fn new() -> Self {
-        return Self::default();
+    fn new(_flags: Self::Flags) -> (Self, Command<Self::Message>) {
+        return (Self::default(), Command::none());
     }
 
     fn title(&self) -> String {
@@ -27,19 +32,39 @@ impl Sandbox for App {
         return iced_native::Theme::Dark;
     }
 
-    fn update(&mut self, message: Self::Message) {
+    fn update(&mut self, message: Self::Message) -> Command<Self::Message> {
         match message {
             AppEvents::Navigate(page) => self.page = page,
+            AppEvents::TaskEvent(event) => match event {
+                events::Event::Connected(conn) => self.event_sender = Some(conn),
+                events::Event::Navigate(page) => self.page = page,
+            },
+            AppEvents::OpenUrl(url) => {
+                let _ = open::that(url);
+            }
         };
+        return Command::none();
+    }
+
+    fn subscription(&self) -> iced_native::Subscription<Self::Message> {
+        task_worker().map(AppEvents::TaskEvent)
     }
 
     fn view(&self) -> iced::Element<'_, Self::Message> {
-        return self.page.navigate();
+        return match self.page {
+            AppPages::Prerequisites => {
+                if let Some(sender) = &self.event_sender {
+                    let mut sender = sender.clone();
+                    sender.send(events::Message::CheckPrereq);
+                }
+                self.page.navigate()
+            }
+            _ => self.page.navigate(),
+        };
     }
 }
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> Result<(), Box<dyn Error>> {
     App::run(Settings::default())?;
 
     return Ok(());
