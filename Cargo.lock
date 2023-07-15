@@ -144,18 +144,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0d8c1fef690941d3e7788d328517591fecc684c084084702d6ff1641e993699a"
 
 [[package]]
-name = "blue-squid"
-version = "0.1.0-beta"
-dependencies = [
- "iced",
- "iced_aw",
- "iced_native",
- "open",
- "thiserror",
- "tokio",
-]
-
-[[package]]
 name = "bumpalo"
 version = "3.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -223,7 +211,7 @@ dependencies = [
  "iana-time-zone",
  "js-sys",
  "num-traits",
- "time 0.1.45",
+ "time",
  "wasm-bindgen",
  "winapi",
 ]
@@ -1061,7 +1049,6 @@ dependencies = [
  "iced_style",
  "lazy_static",
  "num-traits",
- "time 0.3.23",
 ]
 
 [[package]]
@@ -1613,15 +1600,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 1.0.109",
-]
-
-[[package]]
-name = "num_threads"
-version = "0.1.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2819ce041d2ee131036f4fc9d6ae7ae125a3a40e97ba64d04fe799ad9dabbb44"
-dependencies = [
- "libc",
 ]
 
 [[package]]
@@ -2216,6 +2194,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "tectone-os-installer"
+version = "0.1.0-beta"
+dependencies = [
+ "iced",
+ "iced_aw",
+ "iced_native",
+ "open",
+ "tokio",
+]
+
+[[package]]
 name = "termcolor"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2254,24 +2243,6 @@ dependencies = [
  "wasi 0.10.0+wasi-snapshot-preview1",
  "winapi",
 ]
-
-[[package]]
-name = "time"
-version = "0.3.23"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "59e399c068f43a5d116fedaf73b203fa4f9c519f17e2b34f63221d3792f81446"
-dependencies = [
- "libc",
- "num_threads",
- "serde",
- "time-core",
-]
-
-[[package]]
-name = "time-core"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7300fbefb4dadc1af235a9cef3737cea692a9d97e1b9cbcd4ebdae6f8868e6fb"
 
 [[package]]
 name = "tiny-skia"

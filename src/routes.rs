@@ -65,7 +65,7 @@ impl<'a> Routes {
     }
 
     pub fn device_select() -> Page<'a> {
-        return container("").into();
+        todo!();
     }
 
     pub fn prerequisites() -> Page<'a> {

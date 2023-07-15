@@ -53,7 +53,10 @@ pub fn task_worker() -> Subscription<Event> {
                     match input {
                         Message::CheckPrereq => {
                             tokio::time::sleep(Duration::from_secs(3)).await;
-                            output.send(Event::Navigate(AppPages::Eula)).await;
+                            // if this fails, then we have no way of letting the user know
+                            // on the front end. And logging the error wont change much
+                            // for now, I will just drop the error
+                            let _ = output.send(Event::Navigate(AppPages::Eula)).await;
                         }
                     }
                 }
