@@ -2,11 +2,15 @@ use iced::widget::{scrollable, Container};
 use iced_aw::Spinner;
 use iced_native::{
     column, row,
-    widget::{button, container, horizontal_space, text},
+    widget::{button, container, horizontal_space, pick_list, text},
     Color, Length, Padding, Theme,
 };
 
-use crate::events;
+use crate::{
+    events,
+    installer::phone::{Connected, Phone},
+    App,
+};
 
 type Page<'a> = Container<'a, AppEvents>;
 
@@ -15,6 +19,7 @@ pub enum AppEvents {
     Navigate(AppPages),
     TaskEvent(events::Event),
     OpenUrl(&'static str),
+    SetPhone(Phone<Connected>),
 }
 
 #[derive(Debug, Clone, Default)]
@@ -23,14 +28,18 @@ pub enum AppPages {
     Greeting,
     Prerequisites,
     Eula,
+    DeviceSelect,
+    Missing,
 }
 
 impl AppPages {
-    pub fn navigate(&self) -> iced::Element<'_, AppEvents> {
+    pub fn navigate(&self, app: &App) -> iced::Element<'_, AppEvents> {
         return match self {
             AppPages::Greeting => Routes::begin_install(),
             AppPages::Prerequisites => Routes::prerequisites(),
             AppPages::Eula => Routes::eula(),
+            AppPages::DeviceSelect => Routes::device_select(&app.current_phone),
+            AppPages::Missing => Routes::missing(),
         }
         .width(Length::Fill)
         .height(Length::Fill)
@@ -64,8 +73,19 @@ impl<'a> Routes {
         .center_y();
     }
 
-    pub fn device_select() -> Page<'a> {
-        todo!();
+    pub fn device_select(phone: &Option<Phone<Connected>>) -> Page<'a> {
+        let devices = Phone::get_devices();
+
+        let list = pick_list(devices, phone.clone(), |phone| AppEvents::SetPhone(phone));
+
+        return container(column![
+            text("Install TectoneOS on the selected device"),
+            row![
+                list,
+                button("Refresh devices").on_press(AppEvents::Navigate(AppPages::DeviceSelect))
+            ],
+        ])
+        .into();
     }
 
     pub fn prerequisites() -> Page<'a> {
@@ -94,7 +114,7 @@ impl<'a> Routes {
                 horizontal_space(Length::Fill),
                 button("Read online").on_press(AppEvents::OpenUrl("https://youtu.be/sFUmPSyG61c")),
                 button("Go back").on_press(AppEvents::Navigate(AppPages::Greeting)),
-                button("Agree and proceed"),
+                button("Agree and proceed").on_press(AppEvents::Navigate(AppPages::DeviceSelect)),
             ]
             .spacing(24)
             .width(Length::Fill),
@@ -103,6 +123,16 @@ impl<'a> Routes {
         .align_items(iced_native::Alignment::Center);
 
         return container(content_col).into();
+    }
+
+    pub fn missing() -> Page<'a> {
+        let content_col = column![
+            text("System requirements not met").size(32),
+            text("Make sure Android SDK Platform Tools are installed"),
+            button("More info").on_press(AppEvents::OpenUrl("https://developer.android.com/tools/releases/platform-tools")),
+        ];
+
+        return container(content_col.spacing(24));
     }
 }
 

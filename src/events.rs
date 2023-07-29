@@ -1,5 +1,4 @@
-use std::{any::TypeId, time::Duration};
-
+use iced_native::futures::StreamExt;
 use iced_native::{
     futures::{
         channel::mpsc::{self, Sender},
@@ -7,8 +6,10 @@ use iced_native::{
     },
     subscription, Subscription,
 };
+use std::{any::TypeId, time::Duration};
 
 use crate::routes::AppPages;
+use crate::utils::{check_adb, check_fastboot};
 
 pub enum Message {
     CheckPrereq,
@@ -47,16 +48,25 @@ pub fn task_worker() -> Subscription<Event> {
                     state = State::Ready(receiver);
                 }
                 State::Ready(receiver) => {
-                    use iced_native::futures::StreamExt;
                     let input = receiver.select_next_some().await;
 
                     match input {
                         Message::CheckPrereq => {
-                            tokio::time::sleep(Duration::from_secs(3)).await;
+                            // we do something here
+                            // minimum delay of 1 second, because a fast loading
+                            // usually scares techy people
+                            let (adb, fastboot) = tokio::join!(
+                                check_adb(),
+                                check_fastboot(),
+                            );
+
                             // if this fails, then we have no way of letting the user know
                             // on the front end. And logging the error wont change much
                             // for now, I will just drop the error
-                            let _ = output.send(Event::Navigate(AppPages::Eula)).await;
+                            let _ = match adb.and(fastboot) {
+                                Ok(_) => output.send(Event::Navigate(AppPages::Eula)).await,
+                                Err(_) => output.send(Event::Navigate(AppPages::Missing)).await,
+                            };
                         }
                     }
                 }

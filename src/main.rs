@@ -1,17 +1,21 @@
-pub mod events;
+mod events;
 mod routes;
+mod installer;
+mod utils;
 
 use std::error::Error;
 
 use events::{task_worker, Connection};
 use iced::{executor, Application, Settings};
 use iced_native::{Command, Theme};
+use installer::phone::{Phone, Connected};
 use routes::{AppEvents, AppPages};
 
 #[derive(Default)]
-struct App {
+pub struct App {
     page: AppPages,
     event_sender: Option<Connection>,
+    pub current_phone : Option<Phone<Connected>>,
 }
 
 impl Application for App {
@@ -42,12 +46,13 @@ impl Application for App {
             AppEvents::OpenUrl(url) => {
                 let _ = open::that(url);
             }
+            AppEvents::SetPhone(phone) => self.current_phone = Some(phone),
         };
         return Command::none();
     }
 
     fn subscription(&self) -> iced_native::Subscription<Self::Message> {
-        task_worker().map(AppEvents::TaskEvent)
+        return task_worker().map(AppEvents::TaskEvent);
     }
 
     fn view(&self) -> iced::Element<'_, Self::Message> {
@@ -57,9 +62,9 @@ impl Application for App {
                     let mut sender = sender.clone();
                     sender.send(events::Message::CheckPrereq);
                 }
-                self.page.navigate()
+                self.page.navigate(&self)
             }
-            _ => self.page.navigate(),
+            _ => self.page.navigate(&self),
         };
     }
 }
