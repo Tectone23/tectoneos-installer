@@ -26,16 +26,16 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: tcli-linux
-        path: target/release/tcli
+        path: target/release/tectone-os-installer
     - name: Upload MacOS builds
       if: ${{ matrix.os == 'macos-latest' }}
       uses: actions/upload-artifact@v3
       with:
         name: tcli-macos
-        path: target/release/tcli
+        path: target/release/tectone-os-installer
     - name: Upload Windows builds
       if: ${{ matrix.os == 'windows-latest' }}
       uses: actions/upload-artifact@v3
       with:
         name: tcli-windows.exe
-        path: target/release/tcli.exe
+        path: target/release/tectone-os-installer.exe
