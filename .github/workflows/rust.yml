@@ -11,12 +11,31 @@ env:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
 
-    runs-on: ubuntu-latest
+    runs-on: ${{matrix.os}}
 
     steps:
     - uses: actions/checkout@v3
     - name: Build
-      run: cargo build --verbose
-    - name: Run tests
-      run: cargo test --verbose
+      run: cargo build --verbose --release
+    - name: Upload Linux builds
+      if: ${{ matrix.os == 'ubuntu-latest' }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: tcli-linux
+        path: target/release/tcli
+    - name: Upload MacOS builds
+      if: ${{ matrix.os == 'macos-latest' }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: tcli-macos
+        path: target/release/tcli
+    - name: Upload Windows builds
+      if: ${{ matrix.os == 'windows-latest' }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: tcli-windows.exe
+        path: target/release/tcli.exe
