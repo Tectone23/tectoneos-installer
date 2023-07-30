@@ -21,21 +21,23 @@ jobs:
     - uses: actions/checkout@v3
     - name: Build
       run: cargo build --verbose --release
+    - name: Tests
+      run: cargo test --verbose
     - name: Upload Linux builds
       if: ${{ matrix.os == 'ubuntu-latest' }}
       uses: actions/upload-artifact@v3
       with:
-        name: tcli-linux
+        name: linux
         path: target/release/tectone-os-installer
     - name: Upload MacOS builds
       if: ${{ matrix.os == 'macos-latest' }}
       uses: actions/upload-artifact@v3
       with:
-        name: tcli-macos
+        name: macos
         path: target/release/tectone-os-installer
     - name: Upload Windows builds
       if: ${{ matrix.os == 'windows-latest' }}
       uses: actions/upload-artifact@v3
       with:
-        name: tcli-windows.exe
+        name: windows
         path: target/release/tectone-os-installer.exe
